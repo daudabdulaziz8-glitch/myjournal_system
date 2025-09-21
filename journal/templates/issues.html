@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block body %}
+<main class="container">
+  <h3>Browse Issues</h3>
+
+  {% if issues %}
+    <ul class="list">
+      {% for i in issues %}
+        <li class="card">
+          <strong>Volume {{ i.volume }}, Issue {{ i.number }} ({{ i.year }})</strong>
+          <div class="muted">
+            Published: {{ i.published_at.strftime('%Y-%m-%d') if i.published_at else '—' }}
+          </div>
+
+          {% set papers = i.submissions if i.submissions is defined else [] %}
+          {% if papers %}
+            <ul class="list" style="margin-top:8px;">
+              {% for s in papers %}
+                <li>
+                  <strong>{{ s.title }}</strong>
+                  <div class="muted">
+                    {{ s.department or 'FACOMS' }} ·
+                    Status: <span class="badge">{{ s.status.value.replace('_',' ') }}</span>
+                  </div>
+                  {% if current_user.is_authenticated %}
+                    <a class="btn" href="{{ url_for('journal.submission_detail', submission_id=s.id) }}">View</a>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="muted">No articles in this issue yet.</p>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No issues yet.</p>
+  {% endif %}
+</main>
+{% endblock %}

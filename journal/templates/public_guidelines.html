@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block body %}
+<article class="page">
+  <h2>Author Guidelines</h2>
+
+  <h3>Before You Submit</h3>
+  <ul>
+    <li>Confirm your manuscript fits the <a href="{{ url_for('public.aims') }}">Aims &amp; Scope</a>.</li>
+    <li>One corresponding author should register and submit on behalf of all authors.</li>
+    <li>Ensure all authors approve the final version and submission.</li>
+  </ul>
+
+  <h3>Manuscript Preparation</h3>
+  <ul>
+    <li><strong>Format:</strong> PDF, max 10&nbsp;MB (system enforces this). Use clear fonts and numbered sections.</li>
+    <li><strong>Structure (recommended):</strong>
+      <ol>
+        <li>Title, Authors (with affiliations), Abstract (150–250 words), Keywords (3–6)</li>
+        <li>Introduction &amp; Related Work</li>
+        <li>Methods / Theory</li>
+        <li>Results / Experiments</li>
+        <li>Discussion / Limitations</li>
+        <li>Conclusion &amp; Future Work</li>
+        <li>References</li>
+        <li>Appendix / Supplementary (optional)</li>
+      </ol>
+    </li>
+    <li><strong>References:</strong> Any consistent scholarly style is acceptable (e.g., IEEE, APA, AMS).</li>
+    <li><strong>Anonymity:</strong> Reviews may be single-blind by default (reviewer identity hidden from authors).</li>
+    <li><strong>Ethics:</strong> Disclose conflicts of interest, sensitive data, and any human/animal study approvals.</li>
+    <li><strong>Reproducibility (when applicable):</strong> Provide datasets/code URLs in the text or as supplements.</li>
+  </ul>
+
+  <h3>How to Submit</h3>
+  <ol>
+    <li><a href="{{ url_for('journal.register') }}">Register</a> (or <a href="{{ url_for('journal.login') }}">log in</a>).</li>
+    <li>Open <a href="{{ url_for('journal.submit') }}">New Submission</a> and fill in all required fields.</li>
+    <li>Attach your manuscript PDF and submit. You can track status from your Dashboard.</li>
+  </ol>
+
+  <h3>After Submission</h3>
+  <ul>
+    <li><strong>Initial Check:</strong> Editorial screening for scope/format.</li>
+    <li><strong>Peer Review:</strong> Assigned to a reviewer; decisions include Accept / Minor / Major Revision / Reject.</li>
+    <li><strong>Revisions:</strong> You may be asked to revise and re-upload your PDF.</li>
+  </ul>
+
+  <p class="muted">Questions? See <a href="{{ url_for('public.policies') }}">Policies</a> or <a href="{{ url_for('public.contact') }}">Contact</a>.</p>
+</article>
+{% endblock %}

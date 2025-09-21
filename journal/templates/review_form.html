@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block body %}
+<main class="container">
+  <h3>Review: {{ submission.title }}</h3>
+
+  <p><a class="btn" href="{{ url_for('journal.download_submission', submission_id=submission.id) }}">⬇ Download Manuscript (PDF)</a></p>
+
+  <p><strong>Abstract:</strong> {{ submission.abstract }}</p>
+  <p><em>Keywords:</em> {{ submission.keywords or '—' }}</p>
+
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <label>{{ form.comment.label }} {{ form.comment(class_='input', rows=6, placeholder='Enter reviewer comments (min 10 chars).') }}</label>
+    <label>{{ form.score.label }} {{ form.score(class_='input') }}</label>
+    <label>{{ form.decision.label }} {{ form.decision(class_='input') }}</label>
+    {{ form.submit(class_='btn') }}
+  </form>
+</main>
+{% endblock %}

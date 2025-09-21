@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block body %}
+<h3>Login</h3>
+<form method="POST" novalidate>
+  {{ form.hidden_tag() }}
+  <label>{{ form.email.label }} {{ form.email(class_='input', required=True) }}</label>
+  {% for e in form.email.errors %}<div class="err">{{ e }}</div>{% endfor %}
+  <label>{{ form.password.label }} {{ form.password(class_='input', required=True) }}</label>
+  {% for e in form.password.errors %}<div class="err">{{ e }}</div>{% endfor %}
+  <label class="check">{{ form.remember() }} Remember me</label>
+  {{ form.submit(class_='btn') }}
+</form>
+<p>No account? <a href="{{ url_for('journal.register') }}">Register</a></p>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block body %}
+<main class="container">
+  <h3>New Submission</h3>
+  <form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <label>{{ form.title.label }} {{ form.title(class_='input', required=True) }}</label>
+    <label>{{ form.abstract.label }} {{ form.abstract(class_='input', rows=6, required=True, minlength=20) }}</label>
+    <label>{{ form.keywords.label }} {{ form.keywords(class_='input') }}</label>
+    <label>{{ form.authors_text.label }} {{ form.authors_text(class_='input') }}</label>
+    <label>{{ form.department.label }} {{ form.department(class_='input') }}</label>
+
+    <label>{{ form.manuscript.label }} {{ form.manuscript(class_='input', accept='application/pdf') }}</label>
+
+    {{ form.submit(class_='btn') }}
+  </form>
+</main>
+{% endblock %}

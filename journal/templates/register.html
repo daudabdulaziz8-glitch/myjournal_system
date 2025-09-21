@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block body %}
+<h3>Create Account</h3>
+<form method="POST" novalidate>
+  {{ form.hidden_tag() }}
+  <label>{{ form.username.label }} {{ form.username(class_='input', required=True) }}</label>
+  {% for e in form.username.errors %}<div class="err">{{ e }}</div>{% endfor %}
+  <label>{{ form.email.label }} {{ form.email(class_='input', required=True) }}</label>
+  {% for e in form.email.errors %}<div class="err">{{ e }}</div>{% endfor %}
+  <label>{{ form.department.label }} {{ form.department(class_='input', required=True) }}</label>
+  {% for e in form.department.errors %}<div class="err">{{ e }}</div>{% endfor %}
+  <label>{{ form.password.label }} {{ form.password(class_='input', required=True) }}</label>
+  {% for e in form.password.errors %}<div class="err">{{ e }}</div>{% endfor %}
+  <label>{{ form.confirm_password.label }} {{ form.confirm_password(class_='input', required=True) }}</label>
+  {% for e in form.confirm_password.errors %}<div class="err">{{ e }}</div>{% endfor %}
+  {{ form.submit(class_='btn') }}
+</form>
+<p>Already have an account? <a href="{{ url_for('journal.login') }}">Login</a></p>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block body %}
+<main class="container">
+  <h3>Your Review Queue</h3>
+  {% if submissions %}
+    <ul class="list">
+      {% for s in submissions %}
+        <li>
+          <strong>{{ s.title }}</strong>
+          <div class="muted">Author: {{ s.author.username }} · {{ s.created_at.strftime('%Y-%m-%d') }}</div>
+          <a class="btn" href="{{ url_for('journal.download_submission', submission_id=s.id) }}">⬇ PDF</a>
+          <a class="btn" href="{{ url_for('journal.review_submission', submission_id=s.id) }}">Review</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No assigned submissions.</p>
+  {% endif %}
+</main>
+{% endblock %}

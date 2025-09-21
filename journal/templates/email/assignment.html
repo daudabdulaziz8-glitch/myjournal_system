@@ -1,0 +1,12 @@
+<!doctype html>
+<html><body>
+  <p>Dear {{ reviewer.username }},</p>
+  <p>You have been <strong>assigned</strong> to review a manuscript in the FACOMS Journal:</p>
+  <ul>
+    <li><strong>Title:</strong> {{ sub.title }}</li>
+    <li><strong>Author:</strong> {{ sub.author.username }} ({{ sub.author.email }})</li>
+    <li><strong>Submitted:</strong> {{ sub.created_at.strftime('%Y-%m-%d %H:%M') }}</li>
+  </ul>
+  <p>Please log in to your account and open <em>Reviewer Queue</em> to download the PDF and submit your review.</p>
+  <p>Thank you,<br/>FACOMS Journal Editorial Office</p>
+</body></html>

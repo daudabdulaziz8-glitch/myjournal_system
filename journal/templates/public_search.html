@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block body %}
+<article class="page">
+  <h2>Search</h2>
+  <form class="search" action="{{ url_for('public.search') }}" method="get" style="margin-bottom:12px">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search title, abstract, keywords…" />
+    <button class="btn">Search</button>
+  </form>
+
+  {% if q %}
+    <p class="muted">Results for “{{ q }}”</p>
+  {% endif %}
+
+  {% if results %}
+    <div class="cards">
+      {% for a in results %}
+        <article class="card">
+          <h4><a href="{{ url_for('public.article', submission_id=a.id) }}">{{ a.title }}</a></h4>
+          <div class="meta">
+            <span>{{ a.authors_text or a.author.username }}</span> ·
+            <span>{{ a.department or 'FACOMS' }}</span> ·
+            <span>{{ a.created_at.strftime('%Y-%m-%d') }}</span>
+          </div>
+          <p>{{ a.abstract[:200] }}{% if a.abstract|length > 200 %}…{% endif %}</p>
+          <div class="card-actions">
+            <span class="badge status-{{ a.status.value }}">{{ a.status.value.replace('_',' ') }}</span>
+            <a class="btn" href="{{ url_for('public.article', submission_id=a.id) }}">Read</a>
+            {% if a.status.value == 'accepted' %}
+              <a class="btn" href="{{ url_for('public.public_pdf', submission_id=a.id) }}">PDF</a>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    {% if q %}
+      <p class="muted">No accepted articles matched your query.</p>
+    {% else %}
+      <p class="muted">Enter a query to search accepted articles.</p>
+    {% endif %}
+  {% endif %}
+</article>
+{% endblock %}

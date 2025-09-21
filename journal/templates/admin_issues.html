@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block body %}
+<main class="container">
+  <h3>Admin – Issues</h3>
+
+  <section>
+    <h4>Create New Issue</h4>
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; align-items:end; max-width:720px">
+        <label>Volume {{ form.volume(class_='input') }}</label>
+        <label>Issue {{ form.number(class_='input') }}</label>
+        <label>Year {{ form.year(class_='input') }}</label>
+        {{ form.submit(class_='btn btn-primary') }}
+      </div>
+    </form>
+  </section>
+
+  <hr>
+
+  <section>
+    <h4>Existing Issues</h4>
+    {% if issues %}
+      <table class="table">
+        <thead>
+          <tr><th>Label</th><th>Published</th><th>Articles</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for i in issues %}
+          <tr>
+            <td>
+              <a class="btn" href="{{ url_for('journal.admin_issue_detail', issue_id=i.id) }}">
+                Volume {{ i.volume }}, Issue {{ i.number }} ({{ i.year }})
+              </a>
+            </td>
+            <td>{{ i.published_at.strftime('%Y-%m-%d') if i.published_at else '—' }}</td>
+            <td>{{ i.submissions|length }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('journal.admin_issue_delete', issue_id=i.id) }}" onsubmit="return confirm('Delete this issue? (Only if it has no attached articles)');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No issues yet.</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

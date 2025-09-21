@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block body %}
+<article class="page">
+  <h2>Volume {{ issue.volume }}, Issue {{ issue.number }} ({{ issue.year }})</h2>
+  {% if issue.published_at %}
+    <p class="muted">Published: {{ issue.published_at.strftime('%Y-%m-%d') }}</p>
+  {% endif %}
+
+  {% set arts = issue.submissions if issue.submissions is not none else [] %}
+  {% if arts %}
+    <ul class="list">
+      {% for a in arts %}
+        <li>
+          <h3 style="margin:0">
+            <a href="{{ url_for('public.article', submission_id=a.id) }}">{{ a.title }}</a>
+          </h3>
+          <div class="muted">
+            {{ a.authors_text or a.author.username }} ·
+            {{ a.department or 'FACOMS' }}
+          </div>
+          <p>{{ a.abstract[:220] }}{% if a.abstract|length > 220 %}…{% endif %}</p>
+          <div>
+            <span class="badge status-{{ a.status.value }}">{{ a.status.value.replace('_',' ') }}</span>
+            {% if a.status.value == 'accepted' %}
+              <a class="btn" href="{{ url_for('public.public_pdf', submission_id=a.id) }}">PDF</a>
+            {% endif %}
+            <a class="btn" href="{{ url_for('public.article', submission_id=a.id) }}">Read</a>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">No articles are attached to this issue yet.</p>
+  {% endif %}
+</article>
+{% endblock %}

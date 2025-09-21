@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block body %}
+<main class="container">
+  <h3>Your Submissions</h3>
+  <p><a class="btn" href="{{ url_for('journal.submit') }}">➕ New Submission</a></p>
+  {% if submissions %}
+    <ul class="list">
+      {% for s in submissions %}
+        <li>
+          <strong>{{ s.title }}</strong>
+          <div class="muted">
+            {{ s.created_at.strftime('%Y-%m-%d %H:%M') }} ·
+            Status: {{ s.status.value.replace('_',' ') }}
+          </div>
+          <p><em>Keywords:</em> {{ s.keywords or '—' }}</p>
+          <p>{{ s.abstract[:160] }}{% if s.abstract|length > 160 %}...{% endif %}</p>
+          <p style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a class="btn" href="{{ url_for('journal.submission_detail', submission_id=s.id) }}">Details</a>
+            <a class="btn" href="{{ url_for('journal.download_submission', submission_id=s.id) }}">⬇ Download PDF</a>
+          </p>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No submissions yet. Create your first one.</p>
+  {% endif %}
+</main>
+{% endblock %}
