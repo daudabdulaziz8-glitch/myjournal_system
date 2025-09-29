@@ -27,8 +27,19 @@ def create_app(config: dict | None = None):
         app.config.update(config)
 
     # ---- core config ----
-    # Ensure there's always a usable secret key (dev fallback if env var missing)
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or 'dev_secret_key_change_me'
+    # SECRET_KEY handling:
+    # - Use the environment variable when provided.
+    # - Allow a dev fallback only when TESTING is True or ALLOW_DEV_SECRET=1 is set.
+    # - In production-like runs, raise a helpful error to force setting a secret.
+    secret = os.getenv('SECRET_KEY')
+    if not secret:
+        if app.config.get('TESTING') or os.getenv('ALLOW_DEV_SECRET') == '1':
+            secret = 'dev_secret_key_change_me'
+        else:
+            raise RuntimeError(
+                'SECRET_KEY environment variable is required. For development you can set ALLOW_DEV_SECRET=1 or set SECRET_KEY.'
+            )
+    app.config['SECRET_KEY'] = secret
     # Also set the WSGI secret key attribute used by sessions
     app.secret_key = app.config['SECRET_KEY']
     # Ensure Flask-WTF has a CSRF secret key as well
