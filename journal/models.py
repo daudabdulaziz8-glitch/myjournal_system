@@ -4,6 +4,7 @@ import enum
 
 from flask_login import UserMixin
 from . import db, login_manager
+from sqlalchemy import event
 
 
 # ---------- Login loader ----------
@@ -40,8 +41,14 @@ class User(db.Model, UserMixin):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    # We keep simple string role stored as Enum(Role)
-    role = db.Column(db.Enum(Role), default=Role.AUTHOR, nullable=False)
+    # Store the enum's value (author/reviewer/admin) in the DB to avoid
+    # name/value mismatches between Enum.name (AUTHOR) and Enum.value ('author').
+    # Use native_enum=False so SQLite stores the string values.
+    role = db.Column(
+        db.Enum(Role, values_callable=lambda enum_cls: [e.value for e in enum_cls], native_enum=False),
+        default=Role.AUTHOR,
+        nullable=False,
+    )
 
     username = db.Column(db.String(50), unique=True, nullable=False)
     email    = db.Column(db.String(120), unique=True, nullable=False)
@@ -80,6 +87,35 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return f"<User {self.username} ({self.role.value})>"
+
+
+# Normalize role values before insert/update to avoid enum mismatches.
+@event.listens_for(User, 'before_insert')
+def _user_before_insert(mapper, connection, target):
+    # If an Enum was assigned, store its value; otherwise lowercase strings.
+    if target.role is None:
+        return
+    try:
+        # If Role enum instance
+        if hasattr(target.role, 'value'):
+            target.role = target.role.value
+        else:
+            target.role = str(target.role).lower()
+    except Exception:
+        target.role = str(target.role).lower()
+
+
+@event.listens_for(User, 'before_update')
+def _user_before_update(mapper, connection, target):
+    if target.role is None:
+        return
+    try:
+        if hasattr(target.role, 'value'):
+            target.role = target.role.value
+        else:
+            target.role = str(target.role).lower()
+    except Exception:
+        target.role = str(target.role).lower()
 
 
 class Issue(db.Model):

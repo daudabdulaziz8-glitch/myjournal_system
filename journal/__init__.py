@@ -5,6 +5,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect, generate_csrf
+try:
+    from flask_migrate import Migrate
+except Exception:
+    Migrate = None
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -14,18 +18,28 @@ csrf = CSRFProtect()
 login_manager.login_view = 'journal.login'
 login_manager.login_message_category = 'info'
 
-def create_app():
+def create_app(config: dict | None = None):
     # allow instance/ folder (database, uploads)
     app = Flask(__name__, instance_relative_config=True)
 
+    # Allow callers to override config (tests pass in-memory DB, etc.)
+    if config:
+        app.config.update(config)
+
     # ---- core config ----
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev_secret_key_change_me')
+    # Ensure there's always a usable secret key (dev fallback if env var missing)
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or 'dev_secret_key_change_me'
+    # Also set the WSGI secret key attribute used by sessions
+    app.secret_key = app.config['SECRET_KEY']
+    # Ensure Flask-WTF has a CSRF secret key as well
+    app.config.setdefault('WTF_CSRF_SECRET_KEY', app.config['SECRET_KEY'])
     os.makedirs(app.instance_path, exist_ok=True)
 
-    # sqlite db inside instance/
-    db_path = os.path.join(app.instance_path, 'database.db')
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # sqlite db inside instance/ (only set if caller didn't override)
+    if not app.config.get('SQLALCHEMY_DATABASE_URI'):
+        db_path = os.path.join(app.instance_path, 'database.db')
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    app.config.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS', False)
 
     # uploads
     upload_dir = os.path.join(app.instance_path, 'uploads')
@@ -38,6 +52,10 @@ def create_app():
     bcrypt.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
+    # Optionally initialize Flask-Migrate if available in the environment
+    if Migrate is not None:
+        migrate = Migrate()
+        migrate.init_app(app, db)
 
     # expose csrf_token() to ALL templates (for non-WTForms forms)
     @app.context_processor

@@ -3,8 +3,8 @@ from alembic import op
 import sqlalchemy as sa
 
 # Alembic identifiers
-revision = "expand_submission_status_rev"          # can keep auto-generated one
-down_revision = "PUT_YOUR_PREVIOUS_REVISION_ID"    # e.g. "7054151925de"
+revision = "7054151925de"
+down_revision = None
 branch_labels = None
 depends_on = None
 
