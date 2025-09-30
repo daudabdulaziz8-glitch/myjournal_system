@@ -9,6 +9,8 @@ from werkzeug.utils import secure_filename
 from flask_login import login_user, logout_user, login_required, current_user
 from . import db, bcrypt
 from .models import User, Submission, Review, Role, SubmissionStatus, ReviewDecision
+from flask_wtf.csrf import generate_csrf
+
 
 journal_bp = Blueprint(
     "journal",
@@ -221,12 +223,15 @@ def submissions():
 # -----------------------------
 @journal_bp.route("/admin/submissions")
 @login_required
-@role_required("ADMIN")
+@role_required("admin")
 def admin_submissions():
     all_subs = Submission.query.order_by(Submission.created_at.desc()).all()
-    reviewers = [u for u in User.query.all() if _current_role_name(u).upper() == "REVIEWER"]
-    return render_template("admin_submissions.html", submissions=all_subs, reviewers=reviewers)
-
+    reviewers = [u for u in User.query.all() if _current_role_name(u) == "reviewer"]
+    csrf_token = generate_csrf()
+    return render_template("admin_submissions.html",
+                           submissions=all_subs,
+                           reviewers=reviewers,
+                           csrf_token=csrf_token)
 @journal_bp.route("/admin/assign", methods=["POST"])
 @login_required
 @role_required("ADMIN")

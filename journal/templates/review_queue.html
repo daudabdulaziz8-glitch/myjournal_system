@@ -1,51 +1,41 @@
 {% extends "base.html" %}
-
 {% block body %}
 <div class="reviewer-dashboard">
-
-  <!-- Sidebar -->
-  <aside class="reviewer-sidebar">
+  <div class="reviewer-sidebar">
     <h3>Reviewer Panel</h3>
     <ul>
       <li><a href="{{ url_for('journal.reviewer_queue') }}">📋 Review Queue</a></li>
     </ul>
-  </aside>
+  </div>
 
-  <!-- Main Content -->
-  <section class="reviewer-content">
-    <h2>My Review Queue</h2>
-
-    {% if submissions %}
-      <table class="styled-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Status</th>
-            <th>Assigned</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for s in submissions %}
-          <tr>
-            <td>{{ s.id }}</td>
-            <td>{{ s.title }}</td>
-            <td>{{ s.author.username if s.author else "Unknown" }}</td>
-            <td>{{ s.status.value if s.status is defined and s.status.value else s.status }}</td>
-            <td>{{ s.created_at.strftime('%Y-%m-%d') if s.created_at else '' }}</td>
-            <td>
-              <a href="{{ url_for('journal.review_submission', submission_id=s.id) }}" class="btn-small">Review</a>
-              <a href="{{ url_for('journal.download_submission', submission_id=s.id) }}" class="btn-secondary btn-small">Download</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p>No submissions assigned to you yet.</p>
-    {% endif %}
-  </section>
+  <div class="reviewer-content">
+    <h2>My Assigned Submissions</h2>
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in submissions %}
+        <tr>
+          <td>{{ s.id }}</td>
+          <td>{{ s.title }}</td>
+          <td>{{ s.author.username }}</td>
+          <td>{{ s.status.value if s.status is not string else s.status }}</td>
+          <td>
+            <a href="{{ url_for('journal.review_submission', submission_id=s.id) }}" class="btn btn-primary btn-sm">
+              Review
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

@@ -6,34 +6,20 @@
 
   <form method="POST" action="{{ url_for('journal.register') }}">
     {{ form.hidden_tag() }}
-
     <div class="form-group">
-      {{ form.username.label }}
-      {{ form.username(class="form-control") }}
+        {{ form.username.label }} {{ form.username(class="form-control") }}
     </div>
-
     <div class="form-group">
-      {{ form.email.label }}
-      {{ form.email(class="form-control") }}
+        {{ form.email.label }} {{ form.email(class="form-control") }}
     </div>
-
     <div class="form-group">
-      {{ form.department.label }}
-      {{ form.department(class="form-control") }}
+        {{ form.department.label }} {{ form.department(class="form-control") }}
     </div>
-
     <div class="form-group">
-      {{ form.password.label }}
-      {{ form.password(class="form-control") }}
+        {{ form.password.label }} {{ form.password(class="form-control") }}
     </div>
-
-    <div class="form-group">
-      {{ form.confirm_password.label }}
-      {{ form.confirm_password(class="form-control") }}
-    </div>
-
-    <button type="submit" class="btn-primary">Register</button>
-  </form>
+    <button type="submit" class="btn btn-success">Register</button>
+</form>
 
   <p class="switch-link">
     Already have an account?

@@ -11,6 +11,7 @@ bcrypt = Bcrypt()
 login_manager = LoginManager()
 csrf = CSRFProtect()
 
+
 login_manager.login_view = 'journal.login'
 login_manager.login_message_category = 'info'
 

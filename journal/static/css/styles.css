@@ -317,3 +317,28 @@ footer {
   padding: 15px;
   margin-top: 30px;
 }
+/* Landing Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.stat-card {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.stat-card h3 {
+  font-size: 2em;
+  margin: 0;
+  color: #007bff;
+}
+
+.stat-card p {
+  margin: 8px 0 0;
+  color: #555;
+}

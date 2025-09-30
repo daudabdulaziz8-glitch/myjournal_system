@@ -1,50 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FACOMS Journal</title>
-
-    <!-- Correct static CSS path -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <meta charset="UTF-8">
+  <title>{% block title %}Journal System{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="{{ url_for('journal.home') }}">FACOMS Journal</a>
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('journal.dashboard') }}">Dashboard</a>
+      {% if role_val(current_user) == "ADMIN" %}
+        <a href="{{ url_for('journal.admin_submissions') }}">Admin Panel</a>
+        <a href="{{ url_for('journal.admin_users') }}">Users</a>
+      {% elif role_val(current_user) == "REVIEWER" %}
+        <a href="{{ url_for('journal.reviewer_queue') }}">Reviewer Queue</a>
+      {% endif %}
+      <a href="{{ url_for('journal.logout') }}">Logout</a>
+    {% else %}
+      <a href="{{ url_for('journal.login') }}">Login</a>
+      <a href="{{ url_for('journal.register') }}">Register</a>
+    {% endif %}
+  </nav>
 
-    <!-- Navbar -->
-    <div class="navbar">
-        <a href="{{ url_for('journal.home') }}">Home</a>
-        {% if current_user.is_authenticated %}
-            <a href="{{ url_for('journal.dashboard') }}">Dashboard</a>
-            {% if role_val(current_user) == "admin" %}
-                <a href="{{ url_for('journal.admin_submissions') }}">Admin Panel</a>
-            {% elif role_val(current_user) == "reviewer" %}
-                <a href="{{ url_for('journal.reviewer_queue') }}">Reviewer Queue</a>
-            {% endif %}
-            <a href="{{ url_for('journal.logout') }}">Logout</a>
-        {% else %}
-            <a href="{{ url_for('journal.login') }}">Login</a>
-            <a href="{{ url_for('journal.register') }}">Register</a>
-        {% endif %}
-    </div>
+  <!-- Flash Messages -->
+  <div class="flash-messages">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
 
-    <!-- Flash messages -->
-    <div class="flash-messages">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash flash-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    </div>
-
-    <!-- Page content -->
+  <!-- Main Content -->
+  <main>
     {% block body %}{% endblock %}
+  </main>
 
-    <!-- Footer -->
-    <footer style="text-align:center; margin-top:30px; padding:15px; background:#343a40; color:white;">
-        <p>&copy; {{ year }} Faculty of Computing and Mathematics Science (FACOMS). All Rights Reserved.</p>
-    </footer>
-
+  <!-- Footer -->
+  <footer>
+    <p>&copy; {{ year }} Faculty of Computing and Mathematics Science (FACOMS). All Rights Reserved.</p>
+  </footer>
 </body>
 </html>

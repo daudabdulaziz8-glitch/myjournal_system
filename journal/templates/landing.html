@@ -1,50 +1,63 @@
 {% extends "base.html" %}
+{% block title %}FACOMS Journal - Home{% endblock %}
 
 {% block body %}
 <div class="landing-page">
 
-    <!-- ====== Hero Section ====== -->
-    <div class="hero">
-        <h1>Welcome to FACOMS Journal</h1>
-        <p>Publish, review, and manage research submissions with ease.</p>
-
-        <div class="cta-buttons">
-            {% if not current_user.is_authenticated %}
-                <a href="{{ url_for('journal.register') }}" class="btn-primary">Get Started</a>
-                <a href="{{ url_for('journal.login') }}" class="btn-secondary">Login</a>
-            {% else %}
-                <a href="{{ url_for('journal.dashboard') }}" class="btn-primary">Go to Dashboard</a>
-            {% endif %}
-        </div>
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Welcome to FACOMS Journal System</h1>
+    <p>Submit, review, and manage academic journal papers with ease.</p>
+    <div class="cta-buttons">
+      {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('journal.register') }}" class="btn-primary">Get Started</a>
+        <a href="{{ url_for('journal.login') }}" class="btn-secondary">Login</a>
+      {% else %}
+        <a href="{{ url_for('journal.dashboard') }}" class="btn-primary">Go to Dashboard</a>
+      {% endif %}
     </div>
+  </section>
 
-    <!-- ====== Statistics Section ====== -->
-    <div class="stats">
-        <h2>Platform Statistics</h2>
-        <ul>
-            <li><strong>Total Submissions:</strong> {{ stats.total_submissions }}</li>
-            <li><strong>Accepted Papers:</strong> {{ stats.accepted }}</li>
-            <li><strong>Under Review:</strong> {{ stats.under_review }}</li>
-            <li><strong>Registered Reviewers:</strong> {{ stats.reviewers }}</li>
-        </ul>
+  <!-- Stats Section -->
+  <section class="stats">
+    <h2>📊 Journal Statistics</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>{{ stats.total_submissions }}</h3>
+        <p>Total Submissions</p>
+      </div>
+      <div class="stat-card">
+        <h3>{{ stats.accepted }}</h3>
+        <p>Accepted Papers</p>
+      </div>
+      <div class="stat-card">
+        <h3>{{ stats.under_review }}</h3>
+        <p>Under Review</p>
+      </div>
+      <div class="stat-card">
+        <h3>{{ stats.reviewers }}</h3>
+        <p>Active Reviewers</p>
+      </div>
     </div>
+  </section>
 
-    <!-- ====== Recent Submissions Section ====== -->
-    <div class="recent-submissions">
-        <h2>Recent Submissions</h2>
-        {% if recent %}
-            <ul>
-                {% for s in recent %}
-                    <li>
-                        <strong>{{ s.title }}</strong><br>
-                        <em>{{ s.authors_text }}</em> — {{ s.department }}
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No recent submissions yet.</p>
-        {% endif %}
-    </div>
+  <!-- Recent Submissions -->
+  <section class="recent-submissions">
+    <h2>📝 Recent Submissions</h2>
+    {% if recent %}
+      <ul>
+        {% for sub in recent %}
+          <li>
+            <strong>{{ sub.title }}</strong><br>
+            <small>by {{ sub.authors_text }} | {{ sub.created_at.strftime("%B %d, %Y") }}</small><br>
+            <a href="{{ url_for('journal.submission_detail', submission_id=sub.id) }}" class="btn-small">View Details</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No submissions yet.</p>
+    {% endif %}
+  </section>
 
 </div>
 {% endblock %}
