@@ -1,18 +1,43 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block body %}
-<main class="container">
-  <h3>New Submission</h3>
-  <form method="POST" enctype="multipart/form-data">
+<div class="form-container">
+  <h2>New Submission</h2>
+
+  <form method="POST" action="{{ url_for('journal.submit') }}" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
-    <label>{{ form.title.label }} {{ form.title(class_='input', required=True) }}</label>
-    <label>{{ form.abstract.label }} {{ form.abstract(class_='input', rows=6, required=True, minlength=20) }}</label>
-    <label>{{ form.keywords.label }} {{ form.keywords(class_='input') }}</label>
-    <label>{{ form.authors_text.label }} {{ form.authors_text(class_='input') }}</label>
-    <label>{{ form.department.label }} {{ form.department(class_='input') }}</label>
 
-    <label>{{ form.manuscript.label }} {{ form.manuscript(class_='input', accept='application/pdf') }}</label>
+    <div class="form-group">
+      {{ form.title.label }}
+      {{ form.title(class="form-control") }}
+    </div>
 
-    {{ form.submit(class_='btn') }}
+    <div class="form-group">
+      {{ form.abstract.label }}
+      {{ form.abstract(class="form-control", rows="5") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.keywords.label }}
+      {{ form.keywords(class="form-control") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.authors_text.label }}
+      {{ form.authors_text(class="form-control") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.department.label }}
+      {{ form.department(class="form-control") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.pdf_file.label }}
+      {{ form.pdf_file(class="form-control-file") }}
+    </div>
+
+    <button type="submit" class="btn-primary">Submit Paper</button>
   </form>
-</main>
+</div>
 {% endblock %}

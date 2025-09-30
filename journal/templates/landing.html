@@ -1,251 +1,50 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block body %}
-<header class="hero">
-  <div class="hero__inner container">
-    <div class="hero__copy">
-      <div class="eyebrow">Faculty of Computing & Mathematical Sciences (FACOMS)</div>
-      <h1 class="hero__title">FACOMS Journal Submission System</h1>
-      <p class="hero__subtitle">
-        Submit, review, and publish peer-reviewed research in Computing, Mathematics, Statistics,
-        AI/ML, Data Science, and related fields.
-      </p>
-      <div class="hero__cta">
-        {% if current_user.is_authenticated %}
-          <a class="btn btn--primary" href="{{ url_for('journal.submit') }}">Submit Manuscript</a>
-          <a class="btn" href="{{ url_for('journal.dashboard') }}">Your Dashboard</a>
+<div class="landing-page">
+
+    <!-- ====== Hero Section ====== -->
+    <div class="hero">
+        <h1>Welcome to FACOMS Journal</h1>
+        <p>Publish, review, and manage research submissions with ease.</p>
+
+        <div class="cta-buttons">
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('journal.register') }}" class="btn-primary">Get Started</a>
+                <a href="{{ url_for('journal.login') }}" class="btn-secondary">Login</a>
+            {% else %}
+                <a href="{{ url_for('journal.dashboard') }}" class="btn-primary">Go to Dashboard</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ====== Statistics Section ====== -->
+    <div class="stats">
+        <h2>Platform Statistics</h2>
+        <ul>
+            <li><strong>Total Submissions:</strong> {{ stats.total_submissions }}</li>
+            <li><strong>Accepted Papers:</strong> {{ stats.accepted }}</li>
+            <li><strong>Under Review:</strong> {{ stats.under_review }}</li>
+            <li><strong>Registered Reviewers:</strong> {{ stats.reviewers }}</li>
+        </ul>
+    </div>
+
+    <!-- ====== Recent Submissions Section ====== -->
+    <div class="recent-submissions">
+        <h2>Recent Submissions</h2>
+        {% if recent %}
+            <ul>
+                {% for s in recent %}
+                    <li>
+                        <strong>{{ s.title }}</strong><br>
+                        <em>{{ s.authors_text }}</em> — {{ s.department }}
+                    </li>
+                {% endfor %}
+            </ul>
         {% else %}
-          <a class="btn btn--primary" href="{{ url_for('journal.register') }}">Start Submission</a>
-          <a class="btn" href="{{ url_for('journal.login') }}">Author Login</a>
+            <p>No recent submissions yet.</p>
         {% endif %}
-      </div>
-      <ul class="hero__badges">
-        <li>Rigorous peer-review</li>
-        <li>Fast decisions</li>
-        <li>FACOMS visibility</li>
-      </ul>
     </div>
 
-    <div class="hero__panel">
-      <div class="panel counters">
-        <div class="panel__stat">
-          <div class="stat__num counter" data-count="{{ stats.submissions }}">0</div>
-          <div class="stat__label">Total Submissions</div>
-        </div>
-        <div class="panel__stat">
-          <div class="stat__num counter" data-count="{{ stats.accepted }}">0</div>
-          <div class="stat__label">Accepted Papers</div>
-        </div>
-        <div class="panel__stat">
-          <div class="stat__num counter" data-count="{{ stats.reviewers }}">0</div>
-          <div class="stat__label">Active Reviewers</div>
-        </div>
-        <div class="panel__stat">
-          <div class="stat__num counter" data-count="{{ stats.departments }}">0</div>
-          <div class="stat__label">Departments</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</header>
-
-<section class="container section">
-  <form class="search" action="{{ url_for('journal.search') }}" method="get">
-    <input class="input input--lg" type="text" name="q" placeholder="Search articles by title, author, keywords…" required />
-    <button class="btn btn--primary" type="submit">Search</button>
-  </form>
-</section>
-
-{% if featured %}
-<section class="container section">
-  <div class="section__title">Featured Articles</div>
-
-  <div class="carousel" id="featured-carousel" aria-label="Featured articles">
-    <div class="carousel__track" id="featured-track">
-      {% for s in featured %}
-      <article class="carousel__card">
-        <div class="kicker">{{ (s.department or 'FACOMS') }}</div>
-        <h3 class="carousel__title" title="{{ s.title }}">{{ s.title }}</h3>
-        <p class="carousel__meta">
-          {{ s.created_at.strftime('%Y-%m-%d') }} · Status: {{ s.status.value.replace('_',' ') }}
-        </p>
-        {% if s.abstract %}
-          <p class="carousel__abstract">{{ s.abstract[:160] }}{% if s.abstract|length > 160 %}…{% endif %}</p>
-        {% endif %}
-        <div class="carousel__actions">
-          {% if current_user.is_authenticated %}
-            <a class="btn btn--primary btn--sm" href="{{ url_for('journal.download_submission', submission_id=s.id) }}">⬇ PDF</a>
-          {% endif %}
-        </div>
-      </article>
-      {% endfor %}
-    </div>
-
-    <button class="carousel__nav prev" type="button" aria-label="Previous" id="featured-prev">‹</button>
-    <button class="carousel__nav next" type="button" aria-label="Next" id="featured-next">›</button>
-  </div>
-</section>
-{% endif %}
-
-<!-- Trust logos -->
-<section class="strip">
-  <div class="container">
-    <div class="strip__title">Trusted across FACOMS & partners</div>
-    <ul class="logos">
-      <!-- Replace these with actual <img> if you have logos -->
-      <li class="logo">Computing</li>
-      <li class="logo">Mathematics</li>
-      <li class="logo">Statistics</li>
-      <li class="logo">AI/ML</li>
-      <li class="logo">Data Science</li>
-    </ul>
-  </div>
-</section>
-
-<!-- How it works -->
-<section class="container section">
-  <h2 class="section__title">How it works</h2>
-  <div class="grid grid--3 steps">
-    <article class="step">
-      <div class="step__num">1</div>
-      <h3>Submit</h3>
-      <p>Create an account, add title/abstract/keywords, and upload your PDF manuscript.</p>
-    </article>
-    <article class="step">
-      <div class="step__num">2</div>
-      <h3>Peer Review</h3>
-      <p>Admins assign qualified reviewers. Receive constructive feedback promptly.</p>
-    </article>
-    <article class="step">
-      <div class="step__num">3</div>
-      <h3>Publish</h3>
-      <p>Accepted papers are prepared for issue release and showcased across FACOMS.</p>
-    </article>
-  </div>
-</section>
-
-<section class="container cards section">
-  <h2 class="section__title">Why publish with FACOMS?</h2>
-  <div class="grid grid--3">
-    <article class="card">
-      <h3>Rigorous Peer Review</h3>
-      <p>Expert reviewers across Computing, Mathematics, and Statistics ensure high-quality publications.</p>
-    </article>
-    <article class="card">
-      <h3>Fast, Fair Decisions</h3>
-      <p>Streamlined workflows with transparent communication throughout the process.</p>
-    </article>
-    <article class="card">
-      <h3>Wide Visibility</h3>
-      <p>Showcase your research to academia and industry—open access options available.</p>
-    </article>
-  </div>
-</section>
-
-<section class="container section">
-  <div class="split">
-    <div>
-      <h2 class="section__title">Recent Submissions</h2>
-      {% if recent %}
-      <ul class="list list--lined">
-        {% for s in recent %}
-          <li class="list__row">
-            <div>
-              <span class="link-strong">{{ s.title }}</span>
-              <div class="muted sm">
-                {{ s.created_at.strftime('%Y-%m-%d') }} · {{ s.department or 'FACOMS' }} · Status: {{ s.status.value.replace('_',' ') }}
-              </div>
-              <div class="muted xs">{{ s.keywords or '' }}</div>
-            </div>
-            <div>
-              {% if current_user.is_authenticated %}
-                <a class="btn btn--ghost" href="{{ url_for('journal.download_submission', submission_id=s.id) }}">PDF</a>
-              {% endif %}
-            </div>
-          </li>
-        {% endfor %}
-      </ul>
-      {% else %}
-        <p class="muted">No submissions yet.</p>
-      {% endif %}
-    </div>
-    <aside>
-      <h2 class="section__title">Browse Issues</h2>
-      <p class="muted">Explore volumes and issues from the FACOMS Journal.</p>
-      <a class="btn btn--primary" href="{{ url_for('journal.issues') }}">View Issues</a>
-    </aside>
-  </div>
-</section>
-
-<section class="cta section">
-  <div class="container cta__inner">
-    <h2>Ready to submit your paper?</h2>
-    <p>Join authors across Computing and Mathematical Sciences who trust FACOMS.</p>
-    <div class="cta__actions">
-      {% if current_user.is_authenticated %}
-        <a class="btn btn--primary" href="{{ url_for('journal.submit') }}">Start Submission</a>
-        <a class="btn btn--light" href="{{ url_for('journal.dashboard') }}">Go to Dashboard</a>
-      {% else %}
-        <a class="btn btn--primary" href="{{ url_for('journal.register') }}">Create Author Account</a>
-        <a class="btn btn--light" href="{{ url_for('journal.login') }}">Sign In</a>
-      {% endif %}
-    </div>
-  </div>
-</section>
-
-<!-- Carousel + Counter JS -->
-<script>
-(function(){
-  // ----- Carousel -----
-  const track = document.getElementById('featured-track');
-  if(track){
-    const prev = document.getElementById('featured-prev');
-    const next = document.getElementById('featured-next');
-    let index = 0;
-    const cards = Array.from(track.children);
-    const visible = () => {
-      const cardW = cards[0].getBoundingClientRect().width + 16;
-      const vp = track.parentElement.getBoundingClientRect().width;
-      return Math.max(1, Math.floor(vp / cardW));
-    };
-    function go(to){
-      index = Math.max(0, Math.min(to, Math.max(0, cards.length - visible())));
-      const cardW = cards[0].getBoundingClientRect().width + 16;
-      track.style.transform = `translateX(${-index * cardW}px)`;
-    }
-    prev && prev.addEventListener('click', () => go(index - 1));
-    next && next.addEventListener('click', () => go(index + 1));
-    window.addEventListener('resize', () => go(index));
-    let timer = setInterval(() => go(index + 1), 4000);
-    track.addEventListener('mouseenter', () => clearInterval(timer));
-    track.addEventListener('mouseleave', () => timer = setInterval(() => go(index + 1), 4000));
-    go(0);
-  }
-
-  // ----- Animated Counters -----
-  const counters = document.querySelectorAll('.counter');
-  if(counters.length){
-    const ease = (t) => 1 - Math.pow(1 - t, 3);
-    const animate = (el, to) => {
-      const start = performance.now(); const dur = 900;
-      const from = 0; const end = Number(to) || 0;
-      function step(now){
-        const p = Math.min(1, (now - start) / dur);
-        el.textContent = Math.round(from + (end - from) * ease(p));
-        if(p < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    };
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if(e.isIntersecting){
-          const el = e.target;
-          animate(el, el.getAttribute('data-count'));
-          io.unobserve(el);
-        }
-      })
-    }, { threshold: 0.4 });
-    counters.forEach(c => io.observe(c));
-  }
-})();
-</script>
+</div>
 {% endblock %}

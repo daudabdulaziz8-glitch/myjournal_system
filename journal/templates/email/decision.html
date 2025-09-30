@@ -1,15 +1,1 @@
-<!doctype html>
-<html><body>
-  <p>Dear {{ sub.author.username }},</p>
-  <p>Your manuscript has received a decision in the FACOMS Journal:</p>
-  <ul>
-    <li><strong>Title:</strong> {{ sub.title }}</li>
-    <li><strong>Decision:</strong> {{ review.decision.value.replace('_',' ').title() }}</li>
-  </ul>
-  {% if review.comment %}
-  <p><strong>Reviewer Comments:</strong></p>
-  <blockquote style="border-left:3px solid #ccc;padding-left:10px">{{ review.comment|replace('\n','<br>')|safe }}</blockquote>
-  {% endif %}
-  <p>To view details or upload a revision (if applicable), please log in to your dashboard.</p>
-  <p>Regards,<br/>FACOMS Journal Editorial Office</p>
-</body></html>
+<!doctype html><html>  <body style="font-family:Arial,Helvetica,sans-serif; color:#222;">    <h3>FACOMS Journal — Decision on Your Submission</h3>    <p>Dear {{ author_name }},</p>    <p>Your manuscript <strong>{{ title }}</strong> has a new decision: <strong style="text-transform:capitalize">{{ decision }}</strong>.</p>    {% if comment %}      <p><strong>Reviewer comment:</strong></p>      <blockquote style="border-left:4px solid #ddd; padding-left:8px; color:#555;">{{ comment }}</blockquote>    {% endif %}    <p>Regards,<br/>FACOMS Journal Editorial Team</p>  </body></html>

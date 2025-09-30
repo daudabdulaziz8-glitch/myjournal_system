@@ -1,68 +1,51 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block body %}
-<h3>Admin – All Submissions</h3>
+<div class="author-dashboard">
 
-<form method="GET" class="filters">
-  <input type="text" name="q" placeholder="Search title/keywords/author" value="{{ request.args.get('q','') }}">
-  <select name="department">
-    <option value="All" {{ 'selected' if request.args.get('department','All')=='All' else '' }}>All departments</option>
-    {% for d in ['Mathematics','Computer Science','Statistics','Other'] %}
-      <option value="{{ d }}" {{ 'selected' if request.args.get('department')==d else '' }}>{{ d }}</option>
-    {% endfor %}
-  </select>
-  <select name="status">
-    <option value="">All statuses</option>
-    {% for s in ['pending','under_review','accepted','rejected'] %}
-      <option value="{{ s }}" {{ 'selected' if request.args.get('status')==s else '' }}>{{ s.replace('_',' ').title() }}</option>
-    {% endfor %}
-  </select>
-  <input type="date" name="from" value="{{ request.args.get('from','') }}">
-  <input type="date" name="to" value="{{ request.args.get('to','') }}">
-  <select name="sort">
-    <option value="-date" {{ 'selected' if request.args.get('sort','-date')=='-date' else '' }}>Newest first</option>
-    <option value="date" {{ 'selected' if request.args.get('sort')=='date' else '' }}>Oldest first</option>
-    <option value="status" {{ 'selected' if request.args.get('sort')=='status' else '' }}>By status</option>
-  </select>
-  <select name="per_page">
-    {% for n in [5,10,20,50] %}
-      <option value="{{ n }}" {{ 'selected' if request.args.get('per_page','10')==n|string else '' }}>{{ n }}/page</option>
-    {% endfor %}
-  </select>
-  <button class="btn" type="submit">Apply</button>
-</form>
+  <!-- Sidebar -->
+  <aside class="reviewer-sidebar">
+    <h3>Author Panel</h3>
+    <ul>
+      <li><a href="{{ url_for('journal.dashboard') }}">🏠 My Dashboard</a></li>
+      <li><a href="{{ url_for('journal.submit') }}">📄 New Submission</a></li>
+      <li><a href="{{ url_for('journal.submissions') }}">📑 My Submissions</a></li>
+    </ul>
+  </aside>
 
-{% if submissions %}
-  <table class="table">
-    <thead>
-      <tr><th>Title</th><th>Author</th><th>Dept</th><th>Status</th><th>Assigned Reviewer</th><th>Assign</th></tr>
-    </thead>
-    <tbody>
-    {% for s in submissions %}
-      <tr>
-        <td>
-          {{ s.title }}
-          <a class="btn" href="{{ url_for('journal.download_submission', submission_id=s.id) }}">⬇ PDF</a>
-        </td>
-        <td>{{ s.author.username }}</td>
-        <td>{{ s.department or '—' }}</td>
-        <td><span class="badge status-{{ s.status.value }}">{{ s.status.value.replace('_',' ') }}</span></td>
-        <td>{{ s.assigned_reviewer.username if s.assigned_reviewer else '—' }}</td>
-        <td>
-          <form method="POST" action="{{ url_for('journal.assign_reviewer') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="hidden" name="submission_id" value="{{ s.id }}">
-            <select name="reviewer_id" class="input">
-              {% for r in reviewers %}<option value="{{ r.id }}">{{ r.username }}</option>{% endfor %}
-            </select>
-            <button class="btn" type="submit">Assign</button>
-          </form>
-        </td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  {% include '_pagination.html' with context %}
-{% else %}
-  <p>No submissions.</p>
-{% endif %}
+  <!-- Main Content -->
+  <section class="reviewer-content">
+    <h2>My Submissions</h2>
+
+    {% if submissions %}
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in submissions %}
+          <tr>
+            <td>{{ s.id }}</td>
+            <td>{{ s.title }}</td>
+            <td>{{ s.status.value if s.status is defined and s.status.value else s.status }}</td>
+            <td>{{ s.created_at.strftime('%Y-%m-%d') if s.created_at else '' }}</td>
+            <td>
+              <a href="{{ url_for('journal.submission_detail', submission_id=s.id) }}" class="btn-small">View</a>
+              <a href="{{ url_for('journal.download_submission', submission_id=s.id) }}" class="btn-secondary btn-small">Download</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>You don’t have any submissions yet.</p>
+    {% endif %}
+  </section>
+</div>
 {% endblock %}

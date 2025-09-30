@@ -1,58 +1,66 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block body %}
-<main class="container">
-  <h3>Admin – All Submissions</h3>
+<div class="admin-dashboard">
 
-  <!-- Tools: Send a test email (uses the admin_email_test route if you added it) -->
-  <section style="margin: 12px 0; padding: 12px; background: #f8f9ff; border: 1px solid #e6e8ff; border-radius: 8px;">
-    <h4 style="margin-top:0;">Tools</h4>
-    <form method="POST" action="{{ url_for('journal.admin_email_test') }}" style="display:flex; gap:8px; align-items:center; flex-wrap: wrap;">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <label>Send test email to:
-        <input class="input" type="email" name="to" value="{{ current_user.email }}" placeholder="someone@example.com" required>
-      </label>
-      <button class="btn" type="submit">Send Test Email</button>
-      <span class="muted">If SMTP is blocked, a copy is saved in <code>instance/outbox/</code>.</span>
-    </form>
+  <!-- Sidebar -->
+  <aside class="reviewer-sidebar">
+    <h3>Admin Panel</h3>
+    <ul>
+      <li><a href="{{ url_for('journal.admin_submissions') }}">📑 Manage Submissions</a></li>
+      <li><a href="{{ url_for('journal.admin_users') }}">👥 Manage Users</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <section class="reviewer-content">
+    <h2>All Submissions</h2>
+
+    {% if submissions %}
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Assign Reviewer</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in submissions %}
+          <tr>
+            <td>{{ s.id }}</td>
+            <td>{{ s.title }}</td>
+            <td>{{ s.author.username if s.author else "Unknown" }}</td>
+            <td>{{ s.status.value if s.status is defined and s.status.value else s.status }}</td>
+            <td>{{ s.created_at.strftime('%Y-%m-%d') if s.created_at else '' }}</td>
+            <td>
+              {% if reviewers %}
+                <form method="POST" action="{{ url_for('journal.assign_reviewer') }}">
+                  {{ csrf_token() }}
+                  <input type="hidden" name="submission_id" value="{{ s.id }}">
+                  <select name="reviewer_id" class="form-control">
+                    {% for r in reviewers %}
+                      <option value="{{ r.id }}" {% if s.assigned_reviewer_id == r.id %}selected{% endif %}>
+                        {{ r.username }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                  <button type="submit" class="btn-small">Assign</button>
+                </form>
+              {% else %}
+                <p>No reviewers available</p>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No submissions found.</p>
+    {% endif %}
   </section>
-
-  {% if submissions %}
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Title</th><th>Author</th><th>Dept</th><th>Status</th><th>Assigned Reviewer</th><th>Assign</th>
-        </tr>
-      </thead>
-      <tbody>
-      {% for s in submissions %}
-        <tr>
-          <td>
-            {{ s.title }}
-            <a class="btn" href="{{ url_for('journal.submission_detail', submission_id=s.id) }}">Details</a>
-            <a class="btn" href="{{ url_for('journal.download_submission', submission_id=s.id) }}">⬇ PDF</a>
-          </td>
-          <td>{{ s.author.username }}</td>
-          <td>{{ s.department or '—' }}</td>
-          <td>{{ s.status.value.replace('_',' ') }}</td>
-          <td>{{ s.assigned_reviewer.username if s.assigned_reviewer else '—' }}</td>
-          <td>
-            <form method="POST" action="{{ url_for('journal.assign_reviewer') }}">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <input type="hidden" name="submission_id" value="{{ s.id }}">
-              <select name="reviewer_id" class="input">
-                {% for r in reviewers %}
-                  <option value="{{ r.id }}">{{ r.username }}</option>
-                {% endfor %}
-              </select>
-              <button class="btn" type="submit">Assign</button>
-            </form>
-          </td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>No submissions.</p>
-  {% endif %}
-</main>
+</div>
 {% endblock %}

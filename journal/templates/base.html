@@ -1,53 +1,50 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FACOMS JournalSys</title>
-  <link rel="stylesheet" href="{{ url_for('journal.static', filename='styles.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FACOMS Journal</title>
+
+    <!-- Correct static CSS path -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-  <nav class="nav">
-    <!-- FIXED: was public.landing -->
-    <a href="{{ url_for('journal.home') }}" class="brand">FACOMS Journal</a>
-    <div class="links">
-      {% if current_user.is_authenticated %}
-        <a href="{{ url_for('journal.dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('journal.submit') }}">New Submission</a>
-        {% if current_user.role.value == 'reviewer' %}
-          <a href="{{ url_for('journal.reviewer_queue') }}">Reviewer Queue</a>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="{{ url_for('journal.home') }}">Home</a>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('journal.dashboard') }}">Dashboard</a>
+            {% if role_val(current_user) == "admin" %}
+                <a href="{{ url_for('journal.admin_submissions') }}">Admin Panel</a>
+            {% elif role_val(current_user) == "reviewer" %}
+                <a href="{{ url_for('journal.reviewer_queue') }}">Reviewer Queue</a>
+            {% endif %}
+            <a href="{{ url_for('journal.logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ url_for('journal.login') }}">Login</a>
+            <a href="{{ url_for('journal.register') }}">Register</a>
         {% endif %}
-        {% if current_user.role.value == 'admin' %}
-          <a href="{{ url_for('journal.admin_submissions') }}">Admin Panel</a>
-        {% endif %}
-        <a href="{{ url_for('journal.logout') }}">Logout</a>
-      {% else %}
-        <a href="{{ url_for('journal.login') }}">Login</a>
-        <a href="{{ url_for('journal.register') }}">Register</a>
-      {% endif %}
-      <a href="{{ url_for('journal.issues') }}">Issues</a>
     </div>
-  </nav>
 
-  <main class="container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul class="flashes">
-          {% for category, message in messages %}
-            <li class="flash {{ category }}">{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+    <!-- Flash messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
 
-    {% block body %}
-      {% if current_user.is_authenticated %}
-        <h2>Welcome, {{ current_user.username }}!</h2>
-      {% else %}
-        <h2>FACOMS Journal Submission System</h2>
-        <p>Submit, review, and manage manuscripts for the Faculty of Computing & Mathematical Sciences.</p>
-      {% endif %}
-    {% endblock %}
-  </main>
+    <!-- Page content -->
+    {% block body %}{% endblock %}
+
+    <!-- Footer -->
+    <footer style="text-align:center; margin-top:30px; padding:15px; background:#343a40; color:white;">
+        <p>&copy; {{ year }} Faculty of Computing and Mathematics Science (FACOMS). All Rights Reserved.</p>
+    </footer>
+
 </body>
 </html>

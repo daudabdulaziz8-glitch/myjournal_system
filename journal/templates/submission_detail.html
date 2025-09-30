@@ -1,59 +1,51 @@
-{% extends 'base.html' %}
-{% block body %}
-<main class="container">
-  <h3>Submission Details</h3>
+{% extends "base.html" %}
 
-  <section class="card">
-    <h4>{{ submission.title }}</h4>
-    <div class="muted">
-      {{ submission.created_at.strftime('%Y-%m-%d %H:%M') }} ·
-      Status: <span class="badge">{{ submission.status.value.replace('_',' ') }}</span>
-      {% if submission.assigned_reviewer %}
-        · Reviewer: {{ submission.assigned_reviewer.username }}
+{% block body %}
+<div class="submission-detail">
+
+  <!-- Sidebar -->
+  <aside class="reviewer-sidebar">
+    <h3>Author Panel</h3>
+    <ul>
+      <li><a href="{{ url_for('journal.dashboard') }}">🏠 My Dashboard</a></li>
+      <li><a href="{{ url_for('journal.submit') }}">📄 New Submission</a></li>
+      <li><a href="{{ url_for('journal.submissions') }}">📑 My Submissions</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <section class="reviewer-content">
+    <h2>Submission #{{ submission.id }} – {{ submission.title }}</h2>
+
+    <!-- Metadata -->
+    <div class="card">
+      <h3>Manuscript Details</h3>
+      <p><strong>Abstract:</strong> {{ submission.abstract }}</p>
+      <p><strong>Keywords:</strong> {{ submission.keywords }}</p>
+      <p><strong>Authors:</strong> {{ submission.authors_text }}</p>
+      <p><strong>Department:</strong> {{ submission.department }}</p>
+      <p><strong>Status:</strong> {{ submission.status.value if submission.status is defined and submission.status.value else submission.status }}</p>
+      <p><strong>Created:</strong> {{ submission.created_at.strftime('%Y-%m-%d') if submission.created_at else '' }}</p>
+      <a href="{{ url_for('journal.download_submission', submission_id=submission.id) }}" class="btn-secondary">⬇ Download PDF</a>
+    </div>
+
+    <!-- Reviews -->
+    <div class="card">
+      <h3>Reviews</h3>
+      {% if reviews %}
+        {% for r in reviews %}
+        <div class="review-block">
+          <p><strong>Reviewer:</strong> {{ r.reviewer.username if r.reviewer else "Unknown" }}</p>
+          <p><strong>Decision:</strong> {{ r.decision.value if r.decision is defined and r.decision.value else r.decision }}</p>
+          <p><strong>Score:</strong> {{ r.score }}</p>
+          <p><strong>Comments:</strong> {{ r.comment }}</p>
+          <hr>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p>No reviews submitted yet.</p>
       {% endif %}
     </div>
-    <p><strong>Abstract:</strong><br>{{ submission.abstract }}</p>
-    <p><em>Keywords:</em> {{ submission.keywords or '—' }}</p>
-    <p><em>Authors:</em> {{ submission.authors_text or submission.author.username }}</p>
   </section>
-
-  <section class="card">
-    <h4>Manuscript Versions</h4>
-    {% if submission.files %}
-      <table class="table">
-        <thead>
-          <tr><th>Version</th><th>Uploaded</th><th>By</th><th>Note</th><th>Download</th></tr>
-        </thead>
-        <tbody>
-        {% for f in submission.files|sort(attribute='version', reverse=true) %}
-          <tr>
-            <td>v{{ f.version }}</td>
-            <td>{{ f.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</td>
-            <td>{{ f.uploaded_by.username }}</td>
-            <td>{{ f.note or '—' }}</td>
-            <td><a class="btn" href="{{ url_for('journal.download_specific_file', submission_id=submission.id, file_id=f.id) }}">⬇</a></td>
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p>No file uploaded yet.</p>
-    {% endif %}
-  </section>
-
-  {% if current_user.id == submission.author_id and submission.status.value == 'revisions_requested' %}
-  <section class="card">
-    <h4>Upload a Revision</h4>
-    <form method="POST" action="{{ url_for('journal.upload_revision', submission_id=submission.id) }}" enctype="multipart/form-data">
-      {{ rev_form.hidden_tag() }}
-      <label>{{ rev_form.file.label }} {{ rev_form.file(class_='input', accept='application/pdf') }}</label>
-      <label>{{ rev_form.note.label }} {{ rev_form.note(class_='input', placeholder='Brief note (e.g., “Addressed Section 3 comments”)') }}</label>
-      {{ rev_form.submit(class_='btn') }}
-    </form>
-    <p class="muted">After upload, the submission returns to <strong>Under Review</strong>.</p>
-  </section>
-  {% endif %}
-
-  <p><a class="btn" href="{{ url_for('journal.download_submission', submission_id=submission.id) }}">⬇ Download Latest</a></p>
-</main>
+</div>
 {% endblock %}

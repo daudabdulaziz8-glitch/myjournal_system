@@ -1,19 +1,52 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block body %}
-<main class="container">
-  <h3>Review: {{ submission.title }}</h3>
+<div class="reviewer-dashboard">
 
-  <p><a class="btn" href="{{ url_for('journal.download_submission', submission_id=submission.id) }}">⬇ Download Manuscript (PDF)</a></p>
+  <!-- Sidebar -->
+  <aside class="reviewer-sidebar">
+    <h3>Reviewer Panel</h3>
+    <ul>
+      <li><a href="{{ url_for('journal.reviewer_queue') }}">📋 Review Queue</a></li>
+    </ul>
+  </aside>
 
-  <p><strong>Abstract:</strong> {{ submission.abstract }}</p>
-  <p><em>Keywords:</em> {{ submission.keywords or '—' }}</p>
+  <!-- Main Content -->
+  <section class="reviewer-content">
+    <h2>Review Submission #{{ submission.id }} – {{ submission.title }}</h2>
 
-  <form method="POST">
-    {{ form.hidden_tag() }}
-    <label>{{ form.comment.label }} {{ form.comment(class_='input', rows=6, placeholder='Enter reviewer comments (min 10 chars).') }}</label>
-    <label>{{ form.score.label }} {{ form.score(class_='input') }}</label>
-    <label>{{ form.decision.label }} {{ form.decision(class_='input') }}</label>
-    {{ form.submit(class_='btn') }}
-  </form>
-</main>
+    <!-- Manuscript Preview -->
+    <div class="card">
+      <h3>Manuscript Details</h3>
+      <p><strong>Abstract:</strong> {{ submission.abstract }}</p>
+      <p><strong>Keywords:</strong> {{ submission.keywords }}</p>
+      <a href="{{ url_for('journal.download_submission', submission_id=submission.id) }}" class="btn-secondary">⬇ Download PDF</a>
+    </div>
+
+    <!-- Review Form -->
+    <div class="card">
+      <h3>Submit Your Review</h3>
+      <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+          {{ form.comment.label(class="form-label") }}
+          {{ form.comment(class="form-control", rows="4") }}
+        </div>
+
+        <div class="form-group">
+          {{ form.score.label(class="form-label") }}
+          {{ form.score(class="form-control") }}
+        </div>
+
+        <div class="form-group">
+          {{ form.decision.label(class="form-label") }}
+          {{ form.decision(class="form-control") }}
+        </div>
+
+        <button type="submit" class="btn">Submit Review</button>
+      </form>
+    </div>
+  </section>
+</div>
 {% endblock %}

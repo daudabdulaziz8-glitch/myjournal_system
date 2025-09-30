@@ -1,60 +1,68 @@
-# journal/forms.py
 from flask_wtf import FlaskForm
-from wtforms import (
-    StringField, PasswordField, SubmitField, BooleanField,
-    TextAreaField, SelectField, IntegerField
-)
-from wtforms.validators import DataRequired, Length, Email, EqualTo, NumberRange, Optional
-from flask_wtf.file import FileField, FileAllowed, FileRequired
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, FileField
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from flask_wtf.file import FileAllowed
 
-DEPARTMENTS = [
-    ("Computer Science", "Computer Science"),
-    ("Mathematics", "Mathematics"),
-    ("Statistics", "Statistics"),
-    ("Other", "Other"),
-]
+from .models import User  # ✅ import User model for validators
 
 
+# -----------------------------
+# Registration & Login
+# -----------------------------
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=50)])
-    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
-    department = SelectField('Department', choices=DEPARTMENTS, validators=[Optional()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6, max=128)])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField('Create Account')
+    username = StringField("Username", validators=[DataRequired(), Length(min=2, max=20)])
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    department = StringField("Department", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    confirm_password = PasswordField("Confirm Password", validators=[DataRequired(), EqualTo("password")])
+    submit = SubmitField("Sign Up")
+
+    # ✅ Custom validators
+    def validate_username(self, username):
+        user = User.query.filter_by(username=username.data).first()
+        if user:
+            raise ValidationError("That username is already taken. Please choose another.")
+
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user:
+            raise ValidationError("That email is already registered. Please choose another.")
 
 
 class LoginForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6, max=128)])
-    remember = BooleanField('Remember Me')
-    submit = SubmitField('Login')
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    remember = BooleanField("Remember Me")
+    submit = SubmitField("Login")
 
 
+# -----------------------------
+# Submission (Authors)
+# -----------------------------
 class SubmissionForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired(), Length(min=4, max=200)])
-    abstract = TextAreaField('Abstract', validators=[DataRequired(), Length(min=20)])
-    keywords = StringField('Keywords (comma-separated)', validators=[Optional(), Length(max=200)])
-    authors_text = StringField('Co-authors (optional)', validators=[Optional(), Length(max=255)])
-    department = SelectField('Department', choices=DEPARTMENTS, validators=[Optional()])
-    manuscript = FileField('PDF Manuscript (optional)', validators=[FileAllowed(['pdf'], 'PDFs only')])
-    submit = SubmitField('Submit')
+    title = StringField("Title", validators=[DataRequired()])
+    abstract = TextAreaField("Abstract", validators=[DataRequired()])
+    keywords = StringField("Keywords", validators=[DataRequired()])
+    authors_text = StringField("Authors", validators=[DataRequired()])
+    department = StringField("Department", validators=[DataRequired()])
+    pdf_file = FileField("Upload PDF", validators=[DataRequired(), FileAllowed(["pdf"], "PDF only!")])
+    submit = SubmitField("Submit Paper")
 
 
+# -----------------------------
+# Review (Reviewers)
+# -----------------------------
 class ReviewForm(FlaskForm):
-    comment = TextAreaField('Reviewer Comments', validators=[DataRequired(), Length(min=10)])
-    score = IntegerField('Score (1-5)', validators=[NumberRange(min=1, max=5)], default=5)
-    decision = SelectField('Decision', choices=[
-        ("accept", "Accept"),
-        ("minor_revision", "Minor Revision"),
-        ("major_revision", "Major Revision"),
-        ("reject", "Reject"),
-    ], validators=[DataRequired()])
-    submit = SubmitField('Submit Review')
-
-
-class RevisionUploadForm(FlaskForm):
-    """For authors to upload a new PDF version with an optional note."""
-    file = FileField('Revised PDF', validators=[FileRequired(), FileAllowed(['pdf'], 'PDFs only')])
-    note = StringField('Note (optional)', validators=[Optional(), Length(max=255)])
-    submit = SubmitField('Upload Revision')
+    comment = TextAreaField("Comments", validators=[DataRequired()])
+    score = StringField("Score (1-10)", validators=[DataRequired()])
+    decision = SelectField(
+        "Decision",
+        choices=[
+            ("ACCEPT", "Accept"),
+            ("REJECT", "Reject"),
+            ("MINOR_REVISION", "Minor Revision"),
+            ("MAJOR_REVISION", "Major Revision"),
+        ],
+        validators=[DataRequired()]
+    )
+    submit = SubmitField("Submit Review")

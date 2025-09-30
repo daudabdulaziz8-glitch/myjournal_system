@@ -1,39 +1,78 @@
-{% extends 'base.html' %}
-{% block body %}
-<main class="container">
-  <h3>Admin – Manage Users</h3>
+{% extends "base.html" %}
 
-  {% if users %}
-    <table class="table">
-      <thead>
-        <tr>
-          <th>ID</th><th>Name</th><th>Email</th><th>Current Role</th><th>Dept</th><th>Update</th>
-        </tr>
-      </thead>
-      <tbody>
-      {% for u in users %}
-        {% set form = forms[u.id] %}
-        <tr>
-          <td>{{ u.id }}</td>
-          <td>{{ u.username }}</td>
-          <td>{{ u.email }}</td>
-          <td>{{ u.role.value }}</td>
-          <td>{{ u.department or '—' }}</td>
-          <td>
-            <form method="POST" action="{{ url_for('journal.admin_users_update') }}">
-              {{ form.hidden_tag() }}
-              {{ form.user_id(value=u.id) }}
-              {{ form.role(class_='input') }}
-              {{ form.department(class_='input') }}
-              {{ form.submit(class_='btn') }}
-            </form>
-          </td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>No users found.</p>
-  {% endif %}
-</main>
+{% block body %}
+<div class="admin-dashboard">
+
+  <!-- Sidebar -->
+  <aside class="reviewer-sidebar">
+    <h3>Admin Panel</h3>
+    <ul>
+      <li><a href="{{ url_for('journal.admin_submissions') }}">📑 Manage Submissions</a></li>
+      <li><a href="{{ url_for('journal.admin_users') }}">👥 Manage Users</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <section class="reviewer-content">
+    <h2>Manage Users</h2>
+
+    {% if users %}
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Department</th>
+            <th>Current Role</th>
+            <th>Update Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.department or "-" }}</td>
+            <td>{{ u.role.value if u.role is defined and u.role.value else u.role }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('journal.update_user_role') }}">
+                {{ csrf_token() }}
+                <input type="hidden" name="user_id" value="{{ u.id }}">
+                <select name="role" class="form-control">
+  <option value="AUTHOR"
+    {% if u.role =="AUTHOR" or (u.role is defined and u.role.value =="AUTHOR") %}
+      selected
+    {% endif %}>
+    Author
+  </option>
+
+  <option value="REVIEWER"
+    {% if u.role =="REVIEWER" or (u.role is defined and u.role.value =="REVIEWER") %}
+      selected
+    {% endif %}>
+    Reviewer
+  </option>
+
+  <option value="ADMIN"
+    {% if u.role =="ADMIN" or (u.role is defined and u.role.value =="ADMIN") %}
+      selected
+    {% endif %}>
+    Admin
+  </option>
+</select>
+
+                <button type="submit" class="btn-small">Update</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No users found.</p>
+    {% endif %}
+  </section>
+</div>
 {% endblock %}
